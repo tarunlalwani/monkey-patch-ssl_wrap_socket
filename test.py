@@ -6,8 +6,21 @@ except NameError:
     except ImportError:
         from imp import reload  # Python 3.0 - 3.3
 
+
+
+try:
+    import requests
+    assert requests.__version__ != "2.18.0"
+    import requests.packages.urllib3.util.ssl_ as ssl_
+    import requests.packages.urllib3.connection as connection
+except (ImportError,AssertionError):
+    import urllib3.util.ssl_ as ssl_
+    import urllib3.connection as connection
+
 import requests
-_orig_wrap_socket = requests.packages.urllib3.util.ssl_.ssl_wrap_socket
+# import urllib3
+print("Using " + requests.__version__)
+_orig_wrap_socket = ssl_.ssl_wrap_socket
 
 def _ssl_wrap_socket(sock, keyfile=None, certfile=None, cert_reqs=None,
                      ca_certs=None, server_hostname=None,
@@ -20,6 +33,14 @@ def _ssl_wrap_socket(sock, keyfile=None, certfile=None, cert_reqs=None,
                       ciphers=ciphers, ssl_context=ssl_context,
                       ca_cert_dir=ca_cert_dir)
 
-requests.packages.urllib3.util.ssl_.ssl_wrap_socket = _ssl_wrap_socket
-reload(requests.packages.urllib3.connection)
+connection.ssl_wrap_socket = _ssl_wrap_socket
+# if requests.__version__ not in ("2.17.2","2.18.0", "2.17.1"):
+#   _orig_wrap_socket = requests.packages.urllib3.util.ssl_.ssl_wrap_socket
+#   requests.packages.urllib3.connection.ssl_wrap_socket = _ssl_wrap_socket
+#   #reload(requests.packages.urllib3.connection)
+# else:
+#   _orig_wrap_socket = urllib3.util.ssl_.ssl_wrap_socket
+#   urllib3.connection.ssl_wrap_socket=_ssl_wrap_socket
+#   #reload(urllib3.connection)
+
 res = requests.get("https://www.google.com", verify=True)
