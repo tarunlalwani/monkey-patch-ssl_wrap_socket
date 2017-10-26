@@ -1,19 +1,9 @@
 try:
-    reload  # Python 2.7
-except NameError:
-    try:
-        from importlib import reload  # Python 3.4+
-    except ImportError:
-        from imp import reload  # Python 3.0 - 3.3
-
-
-
-try:
     import requests
     assert requests.__version__ != "2.18.0"
     import requests.packages.urllib3.util.ssl_ as ssl_
     import requests.packages.urllib3.connection as connection
-except (ImportError,AssertionError):
+except (ImportError,AssertionError,AttributeError):
     import urllib3.util.ssl_ as ssl_
     import urllib3.connection as connection
 
@@ -34,13 +24,5 @@ def _ssl_wrap_socket(sock, keyfile=None, certfile=None, cert_reqs=None,
                       ca_cert_dir=ca_cert_dir)
 
 connection.ssl_wrap_socket = _ssl_wrap_socket
-# if requests.__version__ not in ("2.17.2","2.18.0", "2.17.1"):
-#   _orig_wrap_socket = requests.packages.urllib3.util.ssl_.ssl_wrap_socket
-#   requests.packages.urllib3.connection.ssl_wrap_socket = _ssl_wrap_socket
-#   #reload(requests.packages.urllib3.connection)
-# else:
-#   _orig_wrap_socket = urllib3.util.ssl_.ssl_wrap_socket
-#   urllib3.connection.ssl_wrap_socket=_ssl_wrap_socket
-#   #reload(urllib3.connection)
 
 res = requests.get("https://www.google.com", verify=True)
